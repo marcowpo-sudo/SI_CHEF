@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    
+    <title>SI CHEF! the TasteList</title>
+    <meta name="theme-color" content="#0d1117">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="icon.svg">
+    <link rel="apple-touch-icon" sizes="192x192" href="icon-192.png">
+    <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png">
+    <link rel="manifest" href="manifest.json">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    
+    <header class="app-header glass-effect">
+        <h1>✨ SI CHEF! the TasteList</h1>
+        <div class="header-actions">
+            <button id="btn-export" class="btn-icon" title="Scarica Backup">🥡 Asporto</button>
+            <label for="import-file" class="btn-icon" title="Carica Backup">🛎️ Ordina</label>
+            <input type="file" id="import-file" accept=".json" class="hidden">
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="form-section">
+            <h2>Prossimo Assaggio</h2>
+            <form id="restaurant-form">
+                
+                <div class="form-row mb-compact">
+                    <div class="input-group" style="margin-bottom: 0;">
+                        <label for="stato">Stato Locale</label>
+                        <select id="stato" class="glass-input">
+                            <option value="Da Testare">🧐 Da Testare</option>
+                            <option value="Visitato">😋 Visitato</option>
+                        </select>
+                    </div>
+                    <div class="input-group" style="margin-bottom: 0;">
+                        <label for="tipologia">Tipologia</label>
+                        <select id="tipologia" class="glass-input">
+                            <option value="Pizzeria">🍕 Pizzeria</option>
+                            <option value="Trattoria">🍝 Trattoria</option>
+                            <option value="Giapponese">🍣 Giapponese</option>
+                            <option value="Cinese">🥟 Cinese</option>
+                            <option value="Indiano">🍛 Indiano</option>
+                            <option value="Thailandese">🍜 Thailandese</option>
+                            <option value="Libanese">🧆 Libanese</option>
+                            <option value="Pub">🍔 Pub</option>
+                            <option value="Altro">✏️ Altro...</option>
+                        </select>
+                    </div>
+                </div>
+                <input type="text" id="tipologia-custom" class="hidden glass-input mb-compact" placeholder="Specifica Tipologia...">
+
+                <div class="input-group">
+                    <label>Nome locale e Preferenza *</label>
+                    <div class="name-diet-wrapper">
+                        <input type="text" id="nome" required placeholder="Es. Osteria del Mare" class="glass-input">
+                        <div class="diet-selector" id="diet-picker" data-diet="Normale">
+                            <button type="button" class="diet-btn" data-val="Vegano" title="Vegano">🌱</button>
+                            <button type="button" class="diet-btn" data-val="Vegetariano" title="Vegetariano">🥗</button>
+                            <button type="button" class="diet-btn active" data-val="Normale" title="Normale">🍽️</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="input-group">
+                        <label>Sito Web / Prenotazione</label>
+                        <div class="link-search-wrapper">
+                            <input type="url" id="link" placeholder="Vuoto = Auto Ricerca" class="glass-input">
+                            <button type="button" id="btn-search-web" class="btn-secondary" title="Cerca sul Web">🔍</button>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label>Instagram</label>
+                        <input type="text" id="instagram" placeholder="@profilo o link" class="glass-input">
+                    </div>
+                </div>
+
+                <div class="notes-box">
+                    <h3>🍴 Valutazione Ristorante</h3>
+                    <div class="custom-rating interactive" id="stars-general" data-rating="0" style="margin-bottom: 8px;">
+                        <span data-val="1">★</span><span data-val="2">★</span><span data-val="3">★</span><span data-val="4">★</span><span data-val="5">★</span>
+                    </div>
+                    <textarea id="note-generali" rows="1" placeholder="Note sul locale..." class="glass-input"></textarea>
+                </div>
+
+                <div class="tiramisu-box">
+                    <h3>🍰 Degustazione Tiramisù</h3>
+                    <div class="tiramisu-grid">
+                        <div class="tira-param">
+                            <label>Crema</label>
+                            <div class="custom-rating interactive" id="beans-crema" data-rating="0">
+                                <span data-val="1">🍮</span><span data-val="2">🍮</span><span data-val="3">🍮</span><span data-val="4">🍮</span><span data-val="5">🍮</span>
+                            </div>
+                            <input type="text" id="note-crema" placeholder="Note crema..." class="glass-input compact-input">
+                        </div>
+                        <div class="tira-param">
+                            <label>Savoiardo</label>
+                            <div class="custom-rating interactive" id="cookie-savoiardo" data-rating="0">
+                                <span data-val="1">🍪</span><span data-val="2">🍪</span><span data-val="3">🍪</span><span data-val="4">🍪</span><span data-val="5">🍪</span>
+                            </div>
+                            <input type="text" id="note-savoiardo" placeholder="Note savoiardo..." class="glass-input compact-input">
+                        </div>
+                        <div class="tira-param">
+                            <label>Caffè</label>
+                            <div class="custom-rating interactive" id="beans-caffe" data-rating="0">
+                                <span data-val="1">☕</span><span data-val="2">☕</span><span data-val="3">☕</span><span data-val="4">☕</span><span data-val="5">☕</span>
+                            </div>
+                            <input type="text" id="note-caffe" placeholder="Note caffè..." class="glass-input compact-input">
+                        </div>
+                        <div class="tira-param">
+                            <label>Voto Finale</label>
+                            <div class="custom-rating interactive" id="cakes-tiramisu" data-rating="0">
+                                <span data-val="1">🍰</span><span data-val="2">🍰</span><span data-val="3">🍰</span><span data-val="4">🍰</span><span data-val="5">🍰</span>
+                            </div>
+                            <input type="text" id="recensione-tiramisu" placeholder="Giudizio finale..." class="glass-input compact-input">
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-primary animated-gradient">Aggiungi alla Collezione</button>
+            </form>
+        </div>
+
+        <div class="list-section">
+            <div class="filter-bar glass-effect">
+                <div class="filter-group">
+                    <label>Filtra per Stato:</label>
+                    <select id="filter-stato" class="glass-select">
+                        <option value="Tutti">🌎 Mostra Tutti</option>
+                        <option value="Da Testare">🧐 Da Testare</option>
+                        <option value="Visitato">😋 Visitati</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Filtra per Tipologia:</label>
+                    <select id="filter-tipologia" class="glass-select">
+                        <option value="Tutte">🍽️ Tutte le Tipologie</option>
+                        <option value="Pizzeria">🍕 Pizzeria</option>
+                        <option value="Trattoria">🍝 Trattoria</option>
+                        <option value="Giapponese">🍣 Giapponese</option>
+                        <option value="Cinese">🥟 Cinese</option>
+                        <option value="Indiano">🍛 Indiano</option>
+                        <option value="Thailandese">🍜 Thailandese</option>
+                        <option value="Libanese">🧆 Libanese</option>
+                        <option value="Pub">🍔 Pub</option>
+                        <option value="Altro">✏️ Altro</option>
+                    </select>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 10px; font-size: 0.85rem; color: var(--text-muted);">
+                Totale Locali Trovati: <strong id="stats-totali" style="color: white;">0</strong>
+            </div>
+
+            <div id="restaurant-list"></div>
+        </div>
+    </div>
+
+    <div id="edit-modal" class="modal-overlay">
+        <div class="modal-content form-section glass-effect">
+            <h2 style="margin-bottom: 1rem; text-align: center;">Modifica Locale</h2>
+            <form id="edit-form">
+                
+                <div class="form-row mb-compact">
+                    <div class="input-group" style="margin-bottom: 0; flex:1;">
+                        <select id="edit-stato" class="glass-input">
+                            <option value="Da Testare">🧐 Da Testare</option>
+                            <option value="Visitato">😋 Visitato</option>
+                        </select>
+                    </div>
+                    <select id="edit-tipologia" class="glass-input" style="flex:1;">
+                        <option value="Pizzeria">🍕 Pizzeria</option>
+                        <option value="Trattoria">🍝 Trattoria</option>
+                        <option value="Giapponese">🍣 Giapponese</option>
+                        <option value="Cinese">🥟 Cinese</option>
+                        <option value="Indiano">🍛 Indiano</option>
+                        <option value="Thailandese">🍜 Thailandese</option>
+                        <option value="Libanese">🧆 Libanese</option>
+                        <option value="Pub">🍔 Pub</option>
+                        <option value="Altro">✏️ Altro...</option>
+                    </select>
+                </div>
+                <input type="text" id="edit-tipologia-custom" class="hidden glass-input mb-compact" placeholder="Specifica...">
+
+                <div class="input-group mb-compact">
+                    <div class="name-diet-wrapper">
+                        <input type="text" id="edit-nome" required class="glass-input">
+                        <div class="diet-selector" id="edit-diet-picker" data-diet="Normale">
+                            <button type="button" class="diet-btn" data-val="Vegano">🌱</button>
+                            <button type="button" class="diet-btn" data-val="Vegetariano">🥗</button>
+                            <button type="button" class="diet-btn" data-val="Normale">🍽️</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="input-group mb-compact">
+                    <input type="tel" id="edit-telefono" placeholder="Telefono" class="glass-input mb-compact">
+                    <div class="form-row">
+                        <input type="url" id="edit-link" placeholder="Sito Web (https://...)" class="glass-input">
+                        <input type="text" id="edit-instagram" placeholder="Instagram (@profilo)" class="glass-input">
+                    </div>
+                </div>
+
+                <div class="notes-box">
+                    <h3>🍴 Ristorante</h3>
+                    <div class="custom-rating interactive" id="edit-stars-general" data-rating="0" style="margin-bottom:8px;">
+                        <span data-val="1">★</span><span data-val="2">★</span><span data-val="3">★</span><span data-val="4">★</span><span data-val="5">★</span>
+                    </div>
+                    <textarea id="edit-note-generali" rows="1" placeholder="Note..." class="glass-input"></textarea>
+                </div>
+
+                <div class="tiramisu-box">
+                    <h3>🍰 Tiramisù</h3>
+                    <div class="tiramisu-grid">
+                        <div class="tira-param">
+                            <label>Crema</label>
+                            <div class="custom-rating interactive" id="edit-beans-crema" data-rating="0">
+                                <span data-val="1">🍮</span><span data-val="2">🍮</span><span data-val="3">🍮</span><span data-val="4">🍮</span><span data-val="5">🍮</span>
+                            </div>
+                            <input type="text" id="edit-note-crema" class="glass-input compact-input" placeholder="Note crema...">
+                        </div>
+                        <div class="tira-param">
+                            <label>Savoiardo</label>
+                            <div class="custom-rating interactive" id="edit-cookie-savoiardo" data-rating="0">
+                                <span data-val="1">🍪</span><span data-val="2">🍪</span><span data-val="3">🍪</span><span data-val="4">🍪</span><span data-val="5">🍪</span>
+                            </div>
+                            <input type="text" id="edit-note-savoiardo" class="glass-input compact-input" placeholder="Note savoiardo...">
+                        </div>
+                        <div class="tira-param">
+                            <label>Caffè</label>
+                            <div class="custom-rating interactive" id="edit-beans-caffe" data-rating="0">
+                                <span data-val="1">☕</span><span data-val="2">☕</span><span data-val="3">☕</span><span data-val="4">☕</span><span data-val="5">☕</span>
+                            </div>
+                            <input type="text" id="edit-note-caffe" class="glass-input compact-input" placeholder="Note caffè...">
+                        </div>
+                        <div class="tira-param">
+                            <label>Voto Finale</label>
+                            <div class="custom-rating interactive" id="edit-cakes-tiramisu" data-rating="0">
+                                <span data-val="1">🍰</span><span data-val="2">🍰</span><span data-val="3">🍰</span><span data-val="4">🍰</span><span data-val="5">🍰</span>
+                            </div>
+                            <input type="text" id="edit-recensione-tiramisu" class="glass-input compact-input" placeholder="Giudizio...">
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 12px; margin-top: 20px;">
+                    <button type="button" class="btn-secondary" onclick="closeEditModal()" style="flex: 1;">Annulla</button>
+                    <button type="submit" class="btn-primary animated-gradient" style="flex: 2;">Salva Modifiche</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
