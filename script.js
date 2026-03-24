@@ -1,6 +1,6 @@
 // [REF-JS-IMPORT-FIREBASE]
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc, updateDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
 // [REF-JS-CONFIGURAZIONE-FIREBASE] 
 const firebaseConfig = {
@@ -79,7 +79,26 @@ window.closeListModal = function() {
     setTimeout(() => m.classList.add('hidden'), 300);
 };
 
-// [REF-JS-EXPORT & IMPORT CLOUD]
+// [REF-JS-EXPORT, IMPORT & MANAUL SYNC CLOUD]
+document.getElementById('btn-sync').addEventListener('click', async () => {
+    const btn = document.getElementById('btn-sync');
+    const originalHTML = btn.innerHTML;
+    btn.innerHTML = '⏳...';
+    try {
+        const snapshot = await getDocs(restRef);
+        restaurants = [];
+        snapshot.forEach((docSnap) => {
+            restaurants.push(docSnap.data());
+        });
+        restaurants.sort((a, b) => b.id - a.id);
+        renderList();
+        showToast("☁️ Sincronizzazione cloud completata!");
+    } catch (e) {
+        showToast("❌ Errore di connessione al Cloud.");
+    }
+    btn.innerHTML = originalHTML;
+});
+
 document.getElementById('btn-export').addEventListener('click', () => {
     if (restaurants.length === 0) return alert("Nessun dato da salvare!");
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(restaurants));
@@ -286,7 +305,7 @@ function getDistance(lat1, lon1, lat2, lng2) {
     return R * c;
 }
 
-// SVG Icons per i contatti
+// SVG Icons per i contatti e i tasti
 const iconWeb = `<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>`;
 const iconIg = `<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>`;
 const iconTel = `<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>`;
@@ -396,7 +415,6 @@ function renderList() {
         try { if(r.link && !r.link.includes('google.com/search')) domain = new URL(r.link).hostname; } catch(e){}
         let iconHtml = domain ? `<img src="https://s2.googleusercontent.com/s2/favicons?domain=${domain}&sz=64" alt="Logo">` : `${dietIcon}`;
 
-        // CORREZIONE ICONA SITO WEB: rimosso il filtro, l'icona appare per ogni link
         let webLink = r.link && r.link.trim() !== "" ? r.link : null;
         let mapsLink = r.maps && r.maps.trim() !== "" ? r.maps : null;
         let telLink = r.telefono && r.telefono.trim() !== "" ? r.telefono : null;
