@@ -1,7 +1,7 @@
 // [REF-JS-STATE] 
 let restaurants = JSON.parse(localStorage.getItem('wishlistRistoranti_Premium')) || [];
 let editingId = null;
-let piattoRowCounter = 0; 
+let piattoRowCounter = 0; // Contatore per ID univoci nei form dinamici
 let userLat = null;
 let userLng = null;
 let tickerInterval = null;
@@ -14,7 +14,7 @@ const editDietPicker = document.getElementById('edit-diet-picker');
 const editModal = document.getElementById('edit-modal');
 const editForm = document.getElementById('edit-form');
 
-// [REF-JS-MODALS] - QUESTO È IL BLOCCO CHE MANCAVA!
+// [REF-JS-MODALS]
 window.openAddModal = function() {
     const m = document.getElementById('add-modal');
     m.classList.remove('hidden');
@@ -88,7 +88,7 @@ function setupDietPicker(picker) {
 setupDietPicker(dietPicker);
 setupDietPicker(editDietPicker);
 
-// [REF-JS-CUSTOM-RATING]
+// [REF-JS-CUSTOM-RATING (Con Deselezione)]
 function setupCustomRating(id) {
     const container = document.getElementById(id);
     if(!container) return;
@@ -240,6 +240,7 @@ sortList.addEventListener('change', function(e) {
     renderList();
 });
 
+// Calcolo distanza Haversine (km)
 function getDistance(lat1, lon1, lat2, lng2) {
     const R = 6371; 
     const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -251,7 +252,7 @@ function getDistance(lat1, lon1, lat2, lng2) {
     return R * c;
 }
 
-// SVG Icons per i contatti e i tasti
+// SVG Icons per i contatti
 const iconWeb = `<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>`;
 const iconIg = `<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>`;
 const iconTel = `<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>`;
@@ -259,7 +260,7 @@ const iconMaps = `<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2
 const iconShare = `<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>`;
 const iconEdit = `<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`;
 
-// [REF-JS-DASHBOARD]
+// [REF-JS-DASHBOARD] - Spaziatura garantita e grammatica italiana
 function startDashboardTicker() {
     const ticker = document.getElementById('ticker-content');
     if(!ticker) return;
@@ -277,12 +278,12 @@ function startDashboardTicker() {
     }
 
     const stats = [
-        `📊 Hai salvato <strong style="margin: 0 4px;">${total}</strong> ${total === 1 ? 'locale' : 'locali'} in totale`,
-        `😋 Ne hai visitati <strong style="margin: 0 4px;">${visitati}</strong>`,
-        `❤️ Hai <strong style="margin: 0 4px;">${preferiti}</strong> ${preferiti === 1 ? 'locale' : 'locali'} nei preferiti`,
-        `⭐ Voto medio assaggi: <strong style="margin: 0 4px;">${avgRating}</strong>`,
-        `🍕 Hai recensito <strong style="margin: 0 4px;">${pizze}</strong> ${pizze === 1 ? 'pizza' : 'pizze'}`,
-        `🍰 Hai degustato <strong style="margin: 0 4px;">${tiramisu}</strong> tiramisù`
+        `📊 Hai salvato &nbsp;<strong>${total}</strong>&nbsp; ${total === 1 ? 'locale' : 'locali'} in totale`,
+        `😋 Ne hai visitati &nbsp;<strong>${visitati}</strong>`,
+        `❤️ Hai &nbsp;<strong>${preferiti}</strong>&nbsp; ${preferiti === 1 ? 'locale' : 'locali'} nei preferiti`,
+        `⭐ Voto medio assaggi: &nbsp;<strong>${avgRating}</strong>`,
+        `🍕 Hai recensito &nbsp;<strong>${pizze}</strong>&nbsp; ${pizze === 1 ? 'pizza' : 'pizze'}`,
+        `🍰 Hai degustato &nbsp;<strong>${tiramisu}</strong>&nbsp; tiramisù`
     ];
 
     ticker.innerHTML = stats.map((s, i) => `<div class="ticker-item ${i===0?'active':''}">${s}</div>`).join('');
@@ -365,10 +366,10 @@ function renderList() {
         try { if(r.link && !r.link.includes('google.com/search')) domain = new URL(r.link).hostname; } catch(e){}
         let iconHtml = domain ? `<img src="https://s2.googleusercontent.com/s2/favicons?domain=${domain}&sz=64" alt="Logo">` : `${dietIcon}`;
 
-        let webLink = r.link && r.link.trim() !== "" && !r.link.includes('google.com/search') ? r.link : null;
+        // I link si vedono se sono pieni. Ora gli url auto-generati compaiono normalmente!
+        let webLink = r.link && r.link.trim() !== "" ? r.link : null;
         let mapsLink = r.maps && r.maps.trim() !== "" ? r.maps : null;
         let telLink = r.telefono && r.telefono.trim() !== "" ? r.telefono : null;
-        
         let igLink = null;
         if (r.instagram && r.instagram.trim() !== "") {
             igLink = r.instagram.startsWith('http') ? r.instagram : `https://www.instagram.com/${r.instagram.replace('@', '')}`;
@@ -500,7 +501,7 @@ window.toggleFavorite = function(id) {
     }
 };
 
-// [REF-JS-SHARE-MODAL]
+// [REF-JS-SHARE-MODAL] 
 window.openShareModal = function(id) {
     const r = restaurants.find(res => res.id === id);
     if(!r) return;
@@ -511,11 +512,11 @@ window.openShareModal = function(id) {
     let mapsLink = r.maps && r.maps.trim() !== "" ? r.maps : `https://maps.google.com/?q=${encodeURIComponent(r.nome + " " + r.tipologia)}`;
     text += `🗺️ Posizione: ${mapsLink}\n`;
     
-    if (r.link && r.link.trim() !== "" && !r.link.includes('google.com/search')) text += `🌐 Web: ${r.link}\n`;
+    if (r.link && r.link.trim() !== "") text += `🌐 Web: ${r.link}\n`;
     
     let igLink = r.instagram && r.instagram.trim() !== "" ? r.instagram : "";
     if (igLink && !igLink.startsWith('http')) igLink = `https://www.instagram.com/${igLink.replace('@', '')}`;
-    if (igLink && !igLink.includes('google.com/search')) text += `📸 IG: ${igLink}\n`;
+    if (igLink) text += `📸 IG: ${igLink}\n`;
     
     const waLink = `https://wa.me/?text=${encodeURIComponent(text)}`;
     const mailLink = `mailto:?subject=${encodeURIComponent("Scopri questo locale: " + r.nome)}&body=${encodeURIComponent(text)}`;
@@ -547,7 +548,7 @@ window.closeShareModal = function() {
     setTimeout(() => modal.classList.add('hidden'), 300);
 };
 
-// [REF-JS-TOAST]
+// [REF-JS-TOAST] 
 function showToast(message) {
     const toast = document.getElementById('toast-alert');
     if (!toast) return;
@@ -566,6 +567,7 @@ form.addEventListener('submit', (e) => {
     let tipologiaValue = document.getElementById('tipologia').value;
     if (tipologiaValue === 'Altro') tipologiaValue = document.getElementById('tipologia-custom').value;
 
+    // Generazione automatica dei link con URL sicuri e corretti al 100%
     let searchQuery = encodeURIComponent(nome + " " + tipologiaValue);
     let linkValue = `https://www.google.com/search?q=${searchQuery}`;
     let mapsValue = `https://maps.google.com/?q=${searchQuery}`;
