@@ -2,7 +2,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
 import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-// [REF-JS-CONFIGURAZIONE-FIREBASE] (I tuoi dati inseriti!)
+// [REF-JS-CONFIGURAZIONE-FIREBASE] 
 const firebaseConfig = {
     apiKey: "AIzaSyBi6iT_AVoIrHQ67tixUfX52vFfIywAXp0",
     authDomain: "sichef-tastelist-c104e.firebaseapp.com",
@@ -18,7 +18,7 @@ const db = getFirestore(app);
 const restRef = collection(db, "restaurants");
 
 // [REF-JS-STATE]
-let restaurants = []; // Ora è vuoto in partenza, si riempirà in un lampo da internet!
+let restaurants = []; 
 let editingId = null;
 let piattoRowCounter = 0; 
 let userLat = null;
@@ -33,17 +33,15 @@ const editDietPicker = document.getElementById('edit-diet-picker');
 const editModal = document.getElementById('edit-modal');
 const editForm = document.getElementById('edit-form');
 
-// [REF-JS-FIREBASE-REALTIME-SYNC] - (Il cuore pulsante del database)
+// [REF-JS-FIREBASE-REALTIME-SYNC]
 onSnapshot(restRef, (snapshot) => {
     restaurants = [];
     snapshot.forEach((docSnap) => {
         restaurants.push(docSnap.data());
     });
     
-    // Li ordiniamo partendo dal più recente
+    // Ordine cronologico
     restaurants.sort((a, b) => b.id - a.id);
-    
-    // Renderizza automaticamente tutto appena arriva un nuovo dato
     renderList();
 });
 
@@ -54,10 +52,10 @@ if (oldLocalData && oldLocalData.length > 0) {
     oldLocalData.forEach(r => {
         setDoc(doc(db, "restaurants", r.id.toString()), r);
     });
-    localStorage.removeItem('wishlistRistoranti_Premium'); // Pulizia automatica
+    localStorage.removeItem('wishlistRistoranti_Premium');
 }
 
-// [REF-JS-MODALS]
+// [REF-JS-MODALS] (Messe in window perché usiamo i Moduli)
 window.openAddModal = function() {
     const m = document.getElementById('add-modal');
     m.classList.remove('hidden');
@@ -100,7 +98,6 @@ document.getElementById('import-file').addEventListener('change', async function
             const importedData = JSON.parse(event.target.result);
             if (Array.isArray(importedData)) {
                 showToast("⏳ Sincronizzazione col Cloud in corso...");
-                // Scrive tutti i locali del backup direttamente sul cloud!
                 for(let r of importedData) {
                     await setDoc(doc(db, "restaurants", r.id.toString()), r);
                 }
@@ -289,7 +286,7 @@ function getDistance(lat1, lon1, lat2, lng2) {
     return R * c;
 }
 
-// SVG Icons per i contatti e i tasti
+// SVG Icons per i contatti
 const iconWeb = `<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>`;
 const iconIg = `<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>`;
 const iconTel = `<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>`;
@@ -342,7 +339,6 @@ window.updateListRating = function(id, val) {
     const r = restaurants.find(res => res.id === id);
     if (r) {
         const newRating = r.ratingRistorante == val ? 0 : parseInt(val);
-        // Firebase Cloud Save
         updateDoc(doc(db, "restaurants", id.toString()), { ratingRistorante: newRating });
     }
 };
@@ -400,7 +396,8 @@ function renderList() {
         try { if(r.link && !r.link.includes('google.com/search')) domain = new URL(r.link).hostname; } catch(e){}
         let iconHtml = domain ? `<img src="https://s2.googleusercontent.com/s2/favicons?domain=${domain}&sz=64" alt="Logo">` : `${dietIcon}`;
 
-        let webLink = r.link && r.link.trim() !== "" && !r.link.includes('google.com/search') ? r.link : null;
+        // CORREZIONE ICONA SITO WEB: rimosso il filtro, l'icona appare per ogni link
+        let webLink = r.link && r.link.trim() !== "" ? r.link : null;
         let mapsLink = r.maps && r.maps.trim() !== "" ? r.maps : null;
         let telLink = r.telefono && r.telefono.trim() !== "" ? r.telefono : null;
         
@@ -526,7 +523,6 @@ window.toggleFavorite = function(id) {
     const r = restaurants.find(res => res.id === id);
     if(r) {
         const newStato = r.stato === 'Preferito' ? 'Visitato' : 'Preferito';
-        // Firebase Cloud Save
         updateDoc(doc(db, "restaurants", id.toString()), { stato: newStato });
     }
 };
@@ -542,11 +538,11 @@ window.openShareModal = function(id) {
     let mapsLink = r.maps && r.maps.trim() !== "" ? r.maps : `https://maps.google.com/?q=${encodeURIComponent(r.nome + " " + r.tipologia)}`;
     text += `🗺️ Posizione: ${mapsLink}\n`;
     
-    if (r.link && r.link.trim() !== "" && !r.link.includes('google.com/search')) text += `🌐 Web: ${r.link}\n`;
+    if (r.link && r.link.trim() !== "") text += `🌐 Web: ${r.link}\n`;
     
     let igLink = r.instagram && r.instagram.trim() !== "" ? r.instagram : "";
     if (igLink && !igLink.startsWith('http')) igLink = `https://www.instagram.com/${igLink.replace('@', '')}`;
-    if (igLink && !igLink.includes('google.com/search')) text += `📸 IG: ${igLink}\n`;
+    if (igLink) text += `📸 IG: ${igLink}\n`;
     
     const waLink = `https://wa.me/?text=${encodeURIComponent(text)}`;
     const mailLink = `mailto:?subject=${encodeURIComponent("Scopri questo locale: " + r.nome)}&body=${encodeURIComponent(text)}`;
@@ -665,7 +661,6 @@ form.addEventListener('submit', (e) => {
 // [REF-JS-DELETE]
 window.deleteRest = function(id) { 
     if(confirm("Rimuovere definitivamente questo locale?")) { 
-        // FIREBASE CLOUD DELETE!
         deleteDoc(doc(db, "restaurants", id.toString()));
     } 
 };
@@ -806,7 +801,6 @@ editForm.addEventListener('submit', (e) => {
             piattoForteNome: null, piattoForteVoto: null, piattoForteNote: null
         };
         
-        // FIREBASE CLOUD SAVE!
         updateDoc(doc(db, "restaurants", editingId.toString()), updatedRest).then(() => {
             closeEditModal();
         });
@@ -815,7 +809,7 @@ editForm.addEventListener('submit', (e) => {
 
 // [REF-JS-INIT]
 addPiattoForteRow('piatti-forti-container'); 
-// Il renderList() iniziale ora viene gestito tutto dalla funzione magica di Firebase "onSnapshot" in alto!
+// Il renderList() iniziale ora viene gestito dalla magia di Firebase in alto!
 
 // [REF-JS-PWA-SERVICE-WORKER] 
 if ('serviceWorker' in navigator) {
