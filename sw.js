@@ -1,10 +1,10 @@
-const CACHE_NAME = 'tastelist-v1';
+const CACHE_NAME = 'sichef-v1';
 const urlsToCache = [
   './',
   './index.html',
   './style.css',
   './script.js',
-  './icon.svg',
+  './manifest.json',
   './icon-192.png',
   './icon-512.png'
 ];
@@ -22,7 +22,7 @@ self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request)
       .then(response => {
-        if (response) return response; // Ritorna la cache se sei offline
+        if (response) return response; 
         return fetch(event.request);
       })
   );
