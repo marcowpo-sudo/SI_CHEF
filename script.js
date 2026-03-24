@@ -1,7 +1,26 @@
-// [REF-JS-STATE] 
-let restaurants = JSON.parse(localStorage.getItem('wishlistRistoranti_Premium')) || [];
+// [REF-JS-IMPORT-FIREBASE]
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+// [REF-JS-CONFIGURAZIONE-FIREBASE] (I tuoi dati inseriti!)
+const firebaseConfig = {
+    apiKey: "AIzaSyBi6iT_AVoIrHQ67tixUfX52vFfIywAXp0",
+    authDomain: "sichef-tastelist-c104e.firebaseapp.com",
+    projectId: "sichef-tastelist-c104e",
+    storageBucket: "sichef-tastelist-c104e.firebasestorage.app",
+    messagingSenderId: "748483688666",
+    appId: "1:748483688666:web:f8031985b89dd6d5630de3"
+};
+
+// Inizializza l'app al Cloud
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const restRef = collection(db, "restaurants");
+
+// [REF-JS-STATE]
+let restaurants = []; // Ora è vuoto in partenza, si riempirà in un lampo da internet!
 let editingId = null;
-let piattoRowCounter = 0; // Contatore per ID univoci nei form dinamici
+let piattoRowCounter = 0; 
 let userLat = null;
 let userLng = null;
 let tickerInterval = null;
@@ -13,6 +32,30 @@ const dietPicker = document.getElementById('diet-picker');
 const editDietPicker = document.getElementById('edit-diet-picker');
 const editModal = document.getElementById('edit-modal');
 const editForm = document.getElementById('edit-form');
+
+// [REF-JS-FIREBASE-REALTIME-SYNC] - (Il cuore pulsante del database)
+onSnapshot(restRef, (snapshot) => {
+    restaurants = [];
+    snapshot.forEach((docSnap) => {
+        restaurants.push(docSnap.data());
+    });
+    
+    // Li ordiniamo partendo dal più recente
+    restaurants.sort((a, b) => b.id - a.id);
+    
+    // Renderizza automaticamente tutto appena arriva un nuovo dato
+    renderList();
+});
+
+// [REF-JS-MIGRAZIONE-AUTOMATICA-VECCHI-DATI]
+const oldLocalData = JSON.parse(localStorage.getItem('wishlistRistoranti_Premium'));
+if (oldLocalData && oldLocalData.length > 0) {
+    showToast("☁️ Sto migrando i tuoi vecchi dati nel Cloud...");
+    oldLocalData.forEach(r => {
+        setDoc(doc(db, "restaurants", r.id.toString()), r);
+    });
+    localStorage.removeItem('wishlistRistoranti_Premium'); // Pulizia automatica
+}
 
 // [REF-JS-MODALS]
 window.openAddModal = function() {
@@ -38,35 +81,30 @@ window.closeListModal = function() {
     setTimeout(() => m.classList.add('hidden'), 300);
 };
 
-// [REF-JS-STORAGE & AUTOSAVE]
-function saveToLocal() { localStorage.setItem('wishlistRistoranti_Premium', JSON.stringify(restaurants)); }
-
-window.addEventListener('beforeunload', saveToLocal);
-document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'hidden') saveToLocal();
-});
-
+// [REF-JS-EXPORT & IMPORT CLOUD]
 document.getElementById('btn-export').addEventListener('click', () => {
     if (restaurants.length === 0) return alert("Nessun dato da salvare!");
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(restaurants));
     const dlAnchorElem = document.createElement('a');
     dlAnchorElem.setAttribute("href", dataStr);
-    dlAnchorElem.setAttribute("download", `TasteList_Backup_${new Date().toISOString().split('T')[0]}.json`);
+    dlAnchorElem.setAttribute("download", `TasteList_CloudBackup_${new Date().toISOString().split('T')[0]}.json`);
     dlAnchorElem.click();
 });
 
-document.getElementById('import-file').addEventListener('change', function(e) {
+document.getElementById('import-file').addEventListener('change', async function(e) {
     const file = e.target.files[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = function(event) {
+    reader.onload = async function(event) {
         try {
             const importedData = JSON.parse(event.target.result);
             if (Array.isArray(importedData)) {
-                restaurants = importedData;
-                saveToLocal();
-                renderList();
-                alert("Collezione importata con successo! 🎉");
+                showToast("⏳ Sincronizzazione col Cloud in corso...");
+                // Scrive tutti i locali del backup direttamente sul cloud!
+                for(let r of importedData) {
+                    await setDoc(doc(db, "restaurants", r.id.toString()), r);
+                }
+                alert("Collezione importata con successo nel Cloud! 🎉");
             } else alert("Formato non valido.");
         } catch (err) { alert("Errore di lettura."); }
     };
@@ -88,7 +126,7 @@ function setupDietPicker(picker) {
 setupDietPicker(dietPicker);
 setupDietPicker(editDietPicker);
 
-// [REF-JS-CUSTOM-RATING (Con Deselezione)]
+// [REF-JS-CUSTOM-RATING]
 function setupCustomRating(id) {
     const container = document.getElementById(id);
     if(!container) return;
@@ -240,7 +278,6 @@ sortList.addEventListener('change', function(e) {
     renderList();
 });
 
-// Calcolo distanza Haversine (km)
 function getDistance(lat1, lon1, lat2, lng2) {
     const R = 6371; 
     const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -252,7 +289,7 @@ function getDistance(lat1, lon1, lat2, lng2) {
     return R * c;
 }
 
-// SVG Icons per i contatti
+// SVG Icons per i contatti e i tasti
 const iconWeb = `<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>`;
 const iconIg = `<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>`;
 const iconTel = `<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>`;
@@ -260,7 +297,7 @@ const iconMaps = `<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2
 const iconShare = `<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>`;
 const iconEdit = `<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`;
 
-// [REF-JS-DASHBOARD] - Spaziatura garantita e grammatica italiana
+// [REF-JS-DASHBOARD]
 function startDashboardTicker() {
     const ticker = document.getElementById('ticker-content');
     if(!ticker) return;
@@ -278,12 +315,12 @@ function startDashboardTicker() {
     }
 
     const stats = [
-        `📊 Hai salvato &nbsp;<strong>${total}</strong>&nbsp; ${total === 1 ? 'locale' : 'locali'} in totale`,
-        `😋 Ne hai visitati &nbsp;<strong>${visitati}</strong>`,
-        `❤️ Hai &nbsp;<strong>${preferiti}</strong>&nbsp; ${preferiti === 1 ? 'locale' : 'locali'} nei preferiti`,
-        `⭐ Voto medio assaggi: &nbsp;<strong>${avgRating}</strong>`,
-        `🍕 Hai recensito &nbsp;<strong>${pizze}</strong>&nbsp; ${pizze === 1 ? 'pizza' : 'pizze'}`,
-        `🍰 Hai degustato &nbsp;<strong>${tiramisu}</strong>&nbsp; tiramisù`
+        `📊 Hai salvato <strong style="margin: 0 4px;">${total}</strong> ${total === 1 ? 'locale' : 'locali'} in totale`,
+        `😋 Ne hai visitati <strong style="margin: 0 4px;">${visitati}</strong>`,
+        `❤️ Hai <strong style="margin: 0 4px;">${preferiti}</strong> ${preferiti === 1 ? 'locale' : 'locali'} nei preferiti`,
+        `⭐ Voto medio assaggi: <strong style="margin: 0 4px;">${avgRating}</strong>`,
+        `🍕 Hai recensito <strong style="margin: 0 4px;">${pizze}</strong> ${pizze === 1 ? 'pizza' : 'pizze'}`,
+        `🍰 Hai degustato <strong style="margin: 0 4px;">${tiramisu}</strong> tiramisù`
     ];
 
     ticker.innerHTML = stats.map((s, i) => `<div class="ticker-item ${i===0?'active':''}">${s}</div>`).join('');
@@ -304,10 +341,9 @@ function startDashboardTicker() {
 window.updateListRating = function(id, val) {
     const r = restaurants.find(res => res.id === id);
     if (r) {
-        if (r.ratingRistorante == val) r.ratingRistorante = 0; 
-        else r.ratingRistorante = parseInt(val);
-        saveToLocal();
-        renderList();
+        const newRating = r.ratingRistorante == val ? 0 : parseInt(val);
+        // Firebase Cloud Save
+        updateDoc(doc(db, "restaurants", id.toString()), { ratingRistorante: newRating });
     }
 };
 
@@ -348,8 +384,6 @@ function renderList() {
             const distB = (b.lat && b.lng) ? getDistance(userLat, userLng, b.lat, b.lng) : Infinity;
             return distA - distB;
         });
-    } else {
-        filtered.sort((a,b) => b.id - a.id);
     }
 
     startDashboardTicker();
@@ -366,10 +400,10 @@ function renderList() {
         try { if(r.link && !r.link.includes('google.com/search')) domain = new URL(r.link).hostname; } catch(e){}
         let iconHtml = domain ? `<img src="https://s2.googleusercontent.com/s2/favicons?domain=${domain}&sz=64" alt="Logo">` : `${dietIcon}`;
 
-        // I link si vedono se sono pieni. Ora gli url auto-generati compaiono normalmente!
-        let webLink = r.link && r.link.trim() !== "" ? r.link : null;
+        let webLink = r.link && r.link.trim() !== "" && !r.link.includes('google.com/search') ? r.link : null;
         let mapsLink = r.maps && r.maps.trim() !== "" ? r.maps : null;
         let telLink = r.telefono && r.telefono.trim() !== "" ? r.telefono : null;
+        
         let igLink = null;
         if (r.instagram && r.instagram.trim() !== "") {
             igLink = r.instagram.startsWith('http') ? r.instagram : `https://www.instagram.com/${r.instagram.replace('@', '')}`;
@@ -491,17 +525,13 @@ function renderList() {
 window.toggleFavorite = function(id) {
     const r = restaurants.find(res => res.id === id);
     if(r) {
-        if(r.stato === 'Preferito') {
-            r.stato = 'Visitato'; 
-        } else {
-            r.stato = 'Preferito';
-        }
-        saveToLocal();
-        renderList();
+        const newStato = r.stato === 'Preferito' ? 'Visitato' : 'Preferito';
+        // Firebase Cloud Save
+        updateDoc(doc(db, "restaurants", id.toString()), { stato: newStato });
     }
 };
 
-// [REF-JS-SHARE-MODAL] 
+// [REF-JS-SHARE-MODAL]
 window.openShareModal = function(id) {
     const r = restaurants.find(res => res.id === id);
     if(!r) return;
@@ -512,11 +542,11 @@ window.openShareModal = function(id) {
     let mapsLink = r.maps && r.maps.trim() !== "" ? r.maps : `https://maps.google.com/?q=${encodeURIComponent(r.nome + " " + r.tipologia)}`;
     text += `🗺️ Posizione: ${mapsLink}\n`;
     
-    if (r.link && r.link.trim() !== "") text += `🌐 Web: ${r.link}\n`;
+    if (r.link && r.link.trim() !== "" && !r.link.includes('google.com/search')) text += `🌐 Web: ${r.link}\n`;
     
     let igLink = r.instagram && r.instagram.trim() !== "" ? r.instagram : "";
     if (igLink && !igLink.startsWith('http')) igLink = `https://www.instagram.com/${igLink.replace('@', '')}`;
-    if (igLink) text += `📸 IG: ${igLink}\n`;
+    if (igLink && !igLink.includes('google.com/search')) text += `📸 IG: ${igLink}\n`;
     
     const waLink = `https://wa.me/?text=${encodeURIComponent(text)}`;
     const mailLink = `mailto:?subject=${encodeURIComponent("Scopri questo locale: " + r.nome)}&body=${encodeURIComponent(text)}`;
@@ -548,7 +578,7 @@ window.closeShareModal = function() {
     setTimeout(() => modal.classList.add('hidden'), 300);
 };
 
-// [REF-JS-TOAST] 
+// [REF-JS-TOAST]
 function showToast(message) {
     const toast = document.getElementById('toast-alert');
     if (!toast) return;
@@ -567,7 +597,6 @@ form.addEventListener('submit', (e) => {
     let tipologiaValue = document.getElementById('tipologia').value;
     if (tipologiaValue === 'Altro') tipologiaValue = document.getElementById('tipologia-custom').value;
 
-    // Generazione automatica dei link con URL sicuri e corretti al 100%
     let searchQuery = encodeURIComponent(nome + " " + tipologiaValue);
     let linkValue = `https://www.google.com/search?q=${searchQuery}`;
     let mapsValue = `https://maps.google.com/?q=${searchQuery}`;
@@ -575,8 +604,10 @@ form.addEventListener('submit', (e) => {
 
     const piattiFortiArr = getPiattiFortiData('piatti-forti-container');
 
-    restaurants.unshift({
-        id: Date.now(),
+    const newId = Date.now();
+
+    const newRestaurant = {
+        id: newId,
         nome,
         stato: document.getElementById('stato').value,
         tipologia: tipologiaValue,
@@ -605,20 +636,18 @@ form.addEventListener('submit', (e) => {
         pizzaRecensione: document.getElementById('recensione-pizza').value,
 
         piattiForti: piattiFortiArr,
-
         telefono: ""
+    };
+    
+    // FIREBASE CLOUD SAVE!
+    setDoc(doc(db, "restaurants", newId.toString()), newRestaurant).then(() => {
+        closeAddModal();
+        if (tipologiaValue === 'Drink&Pub') {
+            showToast("🍻 Andiamo a bere!");
+        } else {
+            showToast("🍽️ Andiamo a mangiare!");
+        }
     });
-    
-    saveToLocal();
-    
-    closeAddModal();
-    renderList();
-    
-    if (tipologiaValue === 'Drink&Pub') {
-        showToast("🍻 Andiamo a bere!");
-    } else {
-        showToast("🍽️ Andiamo a mangiare!");
-    }
 
     form.reset();
     document.getElementById('tipologia-custom').classList.add('hidden');
@@ -636,8 +665,8 @@ form.addEventListener('submit', (e) => {
 // [REF-JS-DELETE]
 window.deleteRest = function(id) { 
     if(confirm("Rimuovere definitivamente questo locale?")) { 
-        restaurants = restaurants.filter(r => r.id !== id); 
-        saveToLocal(); renderList(); 
+        // FIREBASE CLOUD DELETE!
+        deleteDoc(doc(db, "restaurants", id.toString()));
     } 
 };
 
@@ -741,7 +770,7 @@ editForm.addEventListener('submit', (e) => {
             }
         }
 
-        restaurants[idx] = {
+        const updatedRest = {
             ...restaurants[idx],
             nome: document.getElementById('edit-nome').value,
             stato: document.getElementById('edit-stato').value,
@@ -777,15 +806,16 @@ editForm.addEventListener('submit', (e) => {
             piattoForteNome: null, piattoForteVoto: null, piattoForteNote: null
         };
         
-        saveToLocal();
-        renderList();
-        closeEditModal();
+        // FIREBASE CLOUD SAVE!
+        updateDoc(doc(db, "restaurants", editingId.toString()), updatedRest).then(() => {
+            closeEditModal();
+        });
     }
 });
 
 // [REF-JS-INIT]
 addPiattoForteRow('piatti-forti-container'); 
-renderList();
+// Il renderList() iniziale ora viene gestito tutto dalla funzione magica di Firebase "onSnapshot" in alto!
 
 // [REF-JS-PWA-SERVICE-WORKER] 
 if ('serviceWorker' in navigator) {
