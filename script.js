@@ -11,30 +11,8 @@ const form = document.getElementById('restaurant-form');
 const listContainer = document.getElementById('restaurant-list');
 const dietPicker = document.getElementById('diet-picker');
 const editDietPicker = document.getElementById('edit-diet-picker');
-
-// [REF-JS-MODALS]
-window.openAddModal = function() {
-    const m = document.getElementById('add-modal');
-    m.classList.remove('hidden');
-    setTimeout(() => m.classList.add('show'), 10);
-};
-window.closeAddModal = function() {
-    const m = document.getElementById('add-modal');
-    m.classList.remove('show');
-    setTimeout(() => m.classList.add('hidden'), 300);
-};
-
-window.openListModal = function() {
-    renderList();
-    const m = document.getElementById('list-modal');
-    m.classList.remove('hidden');
-    setTimeout(() => m.classList.add('show'), 10);
-};
-window.closeListModal = function() {
-    const m = document.getElementById('list-modal');
-    m.classList.remove('show');
-    setTimeout(() => m.classList.add('hidden'), 300);
-};
+const editModal = document.getElementById('edit-modal');
+const editForm = document.getElementById('edit-form');
 
 // [REF-JS-STORAGE & AUTOSAVE]
 function saveToLocal() { localStorage.setItem('wishlistRistoranti_Premium', JSON.stringify(restaurants)); }
@@ -63,7 +41,7 @@ document.getElementById('import-file').addEventListener('change', function(e) {
             if (Array.isArray(importedData)) {
                 restaurants = importedData;
                 saveToLocal();
-                if(!document.getElementById('list-modal').classList.contains('hidden')) renderList();
+                renderList();
                 alert("Collezione importata con successo! 🎉");
             } else alert("Formato non valido.");
         } catch (err) { alert("Errore di lettura."); }
@@ -86,7 +64,7 @@ function setupDietPicker(picker) {
 setupDietPicker(dietPicker);
 setupDietPicker(editDietPicker);
 
-// [REF-JS-CUSTOM-RATING]
+// [REF-JS-CUSTOM-RATING (Con Deselezione)]
 function setupCustomRating(id) {
     const container = document.getElementById(id);
     if(!container) return;
@@ -194,7 +172,7 @@ window.captureGPS = function(btn, inputId, latId, lngId) {
             const lng = pos.coords.longitude;
             document.getElementById(latId).value = lat;
             document.getElementById(lngId).value = lng;
-            document.getElementById(inputId).value = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+            document.getElementById(inputId).value = `https://maps.google.com/?q=${lat},${lng}`;
             btn.innerHTML = '✅';
             setTimeout(() => btn.innerHTML = originalText, 2000);
         },
@@ -256,8 +234,9 @@ const iconIg = `<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" 
 const iconTel = `<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>`;
 const iconMaps = `<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>`;
 const iconShare = `<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>`;
+const iconEdit = `<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`;
 
-// [REF-JS-DASHBOARD] - Spaziatura garantita e grammatica italiana
+// [REF-JS-DASHBOARD]
 function startDashboardTicker() {
     const ticker = document.getElementById('ticker-content');
     if(!ticker) return;
@@ -275,12 +254,12 @@ function startDashboardTicker() {
     }
 
     const stats = [
-        `📊 Hai salvato &nbsp;<strong>${total}</strong>&nbsp; ${total === 1 ? 'locale' : 'locali'} in totale`,
-        `😋 Ne hai visitati &nbsp;<strong>${visitati}</strong>`,
-        `❤️ Hai &nbsp;<strong>${preferiti}</strong>&nbsp; ${preferiti === 1 ? 'locale' : 'locali'} nei preferiti`,
-        `⭐ Voto medio assaggi: &nbsp;<strong>${avgRating}</strong>`,
-        `🍕 Hai recensito &nbsp;<strong>${pizze}</strong>&nbsp; ${pizze === 1 ? 'pizza' : 'pizze'}`,
-        `🍰 Hai degustato &nbsp;<strong>${tiramisu}</strong>&nbsp; tiramisù`
+        `📊 Hai salvato  <strong>${total}</strong>  ${total === 1 ? 'locale' : 'locali'} in totale`,
+        `😋 Ne hai visitati  <strong>${visitati}</strong>`,
+        `❤️ Hai  <strong>${preferiti}</strong>  ${preferiti === 1 ? 'locale' : 'locali'} nei preferiti`,
+        `⭐ Voto medio assaggi:  <strong>${avgRating}</strong>`,
+        `🍕 Hai recensito  <strong>${pizze}</strong>  ${pizze === 1 ? 'pizza' : 'pizze'}`,
+        `🍰 Hai degustato  <strong>${tiramisu}</strong>  tiramisù`
     ];
 
     ticker.innerHTML = stats.map((s, i) => `<div class="ticker-item ${i===0?'active':''}">${s}</div>`).join('');
@@ -363,11 +342,9 @@ function renderList() {
         try { if(r.link && !r.link.includes('google.com/search')) domain = new URL(r.link).hostname; } catch(e){}
         let iconHtml = domain ? `<img src="https://s2.googleusercontent.com/s2/favicons?domain=${domain}&sz=64" alt="Logo">` : `${dietIcon}`;
 
-        // Nascondi icone social se i campi sono vuoti
-        let webLink = r.link && r.link.trim() !== "" ? r.link : null;
-        let mapsLink = r.maps && r.maps.trim() !== "" ? r.maps : null;
+        let webLink = r.link && r.link.trim() !== "" && !r.link.includes('google.com/search') ? r.link : null;
+        let mapsLink = r.maps && r.maps.trim() !== "" && !r.maps.includes('https://maps.google.com/?q=$') ? r.maps : null;
         let telLink = r.telefono && r.telefono.trim() !== "" ? r.telefono : null;
-        
         let igLink = null;
         if (r.instagram && r.instagram.trim() !== "") {
             igLink = r.instagram.startsWith('http') ? r.instagram : `https://www.instagram.com/${r.instagram.replace('@', '')}`;
@@ -409,7 +386,6 @@ function renderList() {
         const card = document.createElement('div');
         card.className = 'restaurant-card';
         card.style.animationDelay = `${index * 0.05}s`;
-        card.ondblclick = () => openEditModal(r.id);
         
         card.innerHTML = `
             <div class="card-header" style="display: flex; gap: 12px; align-items: flex-start; margin-bottom: 6px;">
@@ -424,6 +400,7 @@ function renderList() {
                     </div>
                 </div>
                 <div class="card-top-actions" style="display: flex; gap: 6px; align-items: center;">
+                    <button class="btn-top-action edit" onclick="event.stopPropagation(); openEditModal(${r.id})" title="Modifica">${iconEdit}</button>
                     <button class="btn-top-action share" onclick="event.stopPropagation(); openShareModal(${r.id})" title="Condividi">${iconShare}</button>
                     <button class="btn-top-action fav ${isPreferito ? 'active' : ''}" onclick="event.stopPropagation(); toggleFavorite(${r.id})" title="${isPreferito ? 'Rimuovi dai Preferiti' : 'Aggiungi ai Preferiti'}">${isPreferito ? '❤️' : '🤍'}</button>
                     <button class="btn-top-action delete" onclick="event.stopPropagation(); deleteRest(${r.id})" title="Elimina">✖</button>
@@ -507,7 +484,7 @@ window.openShareModal = function(id) {
     let text = `🍽️ *${r.nome}*\n`;
     text += `📍 Tipologia: ${r.tipologia}\n\n`;
     
-    let mapsLink = r.maps && r.maps.trim() !== "" ? r.maps : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(r.nome + " " + r.tipologia)}`;
+    let mapsLink = r.maps && r.maps.trim() !== "" ? r.maps : `https://maps.google.com/?q=${encodeURIComponent(r.nome + " " + r.tipologia)}`;
     text += `🗺️ Posizione: ${mapsLink}\n`;
     
     if (r.link && r.link.trim() !== "" && !r.link.includes('google.com/search')) text += `🌐 Web: ${r.link}\n`;
@@ -565,10 +542,9 @@ form.addEventListener('submit', (e) => {
     let tipologiaValue = document.getElementById('tipologia').value;
     if (tipologiaValue === 'Altro') tipologiaValue = document.getElementById('tipologia-custom').value;
 
-    // Generazione automatica dei link con URL sicuri e corretti al 100%
     let searchQuery = encodeURIComponent(nome + " " + tipologiaValue);
     let linkValue = `https://www.google.com/search?q=${searchQuery}`;
-    let mapsValue = `https://www.google.com/maps/search/?api=1&query=${searchQuery}`;
+    let mapsValue = `https://maps.google.com/?q=${searchQuery}`;
     let instagramValue = `https://www.google.com/search?q=${encodeURIComponent("site:instagram.com " + nome + " " + tipologiaValue)}`;
 
     const piattiFortiArr = getPiattiFortiData('piatti-forti-container');
@@ -609,7 +585,6 @@ form.addEventListener('submit', (e) => {
     
     saveToLocal();
     
-    // Chiude il modal form se era aperto e aggiorna la lista in background
     closeAddModal();
     renderList();
     
@@ -728,7 +703,6 @@ editForm.addEventListener('submit', (e) => {
         let eLat = document.getElementById('edit-lat').value || null;
         let eLng = document.getElementById('edit-lng').value || null;
 
-        // Se l'utente svuota intenzionalmente la casella (diventa ""), l'icona scompare e viene memorizzato vuoto!
         let formIg = document.getElementById('edit-instagram').value.trim();
         let newIg = "";
         if (formIg !== "") {
@@ -750,7 +724,7 @@ editForm.addEventListener('submit', (e) => {
             telefono: document.getElementById('edit-telefono').value.trim(),
             link: document.getElementById('edit-link').value.trim(),
             maps: document.getElementById('edit-maps').value.trim(),
-            instagram: newIg, // Salva la stringa corretta di Instagram o stringa vuota
+            instagram: newIg, 
             lat: eLat ? parseFloat(eLat) : restaurants[idx].lat, 
             lng: eLng ? parseFloat(eLng) : restaurants[idx].lng,
             noteGenerali: document.getElementById('edit-note-generali').value,
