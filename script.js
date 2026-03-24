@@ -14,6 +14,30 @@ const editDietPicker = document.getElementById('edit-diet-picker');
 const editModal = document.getElementById('edit-modal');
 const editForm = document.getElementById('edit-form');
 
+// [REF-JS-MODALS] - QUESTO È IL BLOCCO CHE MANCAVA!
+window.openAddModal = function() {
+    const m = document.getElementById('add-modal');
+    m.classList.remove('hidden');
+    setTimeout(() => m.classList.add('show'), 10);
+};
+window.closeAddModal = function() {
+    const m = document.getElementById('add-modal');
+    m.classList.remove('show');
+    setTimeout(() => m.classList.add('hidden'), 300);
+};
+
+window.openListModal = function() {
+    renderList();
+    const m = document.getElementById('list-modal');
+    m.classList.remove('hidden');
+    setTimeout(() => m.classList.add('show'), 10);
+};
+window.closeListModal = function() {
+    const m = document.getElementById('list-modal');
+    m.classList.remove('show');
+    setTimeout(() => m.classList.add('hidden'), 300);
+};
+
 // [REF-JS-STORAGE & AUTOSAVE]
 function saveToLocal() { localStorage.setItem('wishlistRistoranti_Premium', JSON.stringify(restaurants)); }
 
@@ -64,7 +88,7 @@ function setupDietPicker(picker) {
 setupDietPicker(dietPicker);
 setupDietPicker(editDietPicker);
 
-// [REF-JS-CUSTOM-RATING (Con Deselezione)]
+// [REF-JS-CUSTOM-RATING]
 function setupCustomRating(id) {
     const container = document.getElementById(id);
     if(!container) return;
@@ -216,7 +240,6 @@ sortList.addEventListener('change', function(e) {
     renderList();
 });
 
-// Calcolo distanza Haversine (km)
 function getDistance(lat1, lon1, lat2, lng2) {
     const R = 6371; 
     const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -228,7 +251,7 @@ function getDistance(lat1, lon1, lat2, lng2) {
     return R * c;
 }
 
-// SVG Icons per i contatti
+// SVG Icons per i contatti e i tasti
 const iconWeb = `<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>`;
 const iconIg = `<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>`;
 const iconTel = `<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>`;
@@ -254,12 +277,12 @@ function startDashboardTicker() {
     }
 
     const stats = [
-        `📊 Hai salvato  <strong>${total}</strong>  ${total === 1 ? 'locale' : 'locali'} in totale`,
-        `😋 Ne hai visitati  <strong>${visitati}</strong>`,
-        `❤️ Hai  <strong>${preferiti}</strong>  ${preferiti === 1 ? 'locale' : 'locali'} nei preferiti`,
-        `⭐ Voto medio assaggi:  <strong>${avgRating}</strong>`,
-        `🍕 Hai recensito  <strong>${pizze}</strong>  ${pizze === 1 ? 'pizza' : 'pizze'}`,
-        `🍰 Hai degustato  <strong>${tiramisu}</strong>  tiramisù`
+        `📊 Hai salvato <strong style="margin: 0 4px;">${total}</strong> ${total === 1 ? 'locale' : 'locali'} in totale`,
+        `😋 Ne hai visitati <strong style="margin: 0 4px;">${visitati}</strong>`,
+        `❤️ Hai <strong style="margin: 0 4px;">${preferiti}</strong> ${preferiti === 1 ? 'locale' : 'locali'} nei preferiti`,
+        `⭐ Voto medio assaggi: <strong style="margin: 0 4px;">${avgRating}</strong>`,
+        `🍕 Hai recensito <strong style="margin: 0 4px;">${pizze}</strong> ${pizze === 1 ? 'pizza' : 'pizze'}`,
+        `🍰 Hai degustato <strong style="margin: 0 4px;">${tiramisu}</strong> tiramisù`
     ];
 
     ticker.innerHTML = stats.map((s, i) => `<div class="ticker-item ${i===0?'active':''}">${s}</div>`).join('');
@@ -343,8 +366,9 @@ function renderList() {
         let iconHtml = domain ? `<img src="https://s2.googleusercontent.com/s2/favicons?domain=${domain}&sz=64" alt="Logo">` : `${dietIcon}`;
 
         let webLink = r.link && r.link.trim() !== "" && !r.link.includes('google.com/search') ? r.link : null;
-        let mapsLink = r.maps && r.maps.trim() !== "" && !r.maps.includes('https://maps.google.com/?q=$') ? r.maps : null;
+        let mapsLink = r.maps && r.maps.trim() !== "" ? r.maps : null;
         let telLink = r.telefono && r.telefono.trim() !== "" ? r.telefono : null;
+        
         let igLink = null;
         if (r.instagram && r.instagram.trim() !== "") {
             igLink = r.instagram.startsWith('http') ? r.instagram : `https://www.instagram.com/${r.instagram.replace('@', '')}`;
@@ -476,7 +500,7 @@ window.toggleFavorite = function(id) {
     }
 };
 
-// [REF-JS-SHARE-MODAL] 
+// [REF-JS-SHARE-MODAL]
 window.openShareModal = function(id) {
     const r = restaurants.find(res => res.id === id);
     if(!r) return;
@@ -523,7 +547,7 @@ window.closeShareModal = function() {
     setTimeout(() => modal.classList.add('hidden'), 300);
 };
 
-// [REF-JS-TOAST] 
+// [REF-JS-TOAST]
 function showToast(message) {
     const toast = document.getElementById('toast-alert');
     if (!toast) return;
