@@ -8,6 +8,7 @@
     --primary: #ff7b72;
     --primary-hover: #ff938a;
     --gradient: linear-gradient(135deg, #ff7b72 0%, #fca048 50%, #ff7b72 100%);
+    --gradient-alt: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #3b82f6 100%);
     --border-color: #30363d;
     --star-filled: #fbbf24;
     --glass-bg: rgba(22, 27, 34, 0.7);
@@ -159,17 +160,21 @@ textarea.glass-input { min-height: 46px; resize: vertical; }
 
 @media (max-width: 400px) { .tiramisu-grid { grid-template-columns: 1fr; } }
 
-/* [REF-CSS-BUTTONS] */
+/* [REF-CSS-BUTTONS & HOME EFFECTS] */
 .home-menu { display: flex; flex-direction: column; gap: 16px; margin-top: 10px; }
 .big-btn { 
     width: 100%; padding: 1.2rem; font-size: 1.15rem; border-radius: 16px; display: flex; 
     align-items: center; justify-content: center; gap: 12px; font-weight: 600;
     cursor: pointer; transition: 0.3s; border: none; color: white;
 }
+
 .big-btn.primary { background-image: var(--gradient); background-size: 200% auto; box-shadow: 0 4px 15px rgba(255, 123, 114, 0.2); }
 .big-btn.primary:hover { background-position: right center; box-shadow: 0 6px 20px rgba(255, 123, 114, 0.4); transform: translateY(-2px); }
-.big-btn.secondary { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); }
-.big-btn.secondary:hover { background: rgba(255,255,255,0.1); transform: translateY(-2px); }
+
+/* Nuova Comanda riceve un gradiente diverso e bellissimo per stare in armonia */
+.big-btn.secondary { background-image: var(--gradient-alt); background-size: 200% auto; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.2); }
+.big-btn.secondary:hover { background-position: right center; box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4); transform: translateY(-2px); }
+
 .big-btn .icon { font-size: 1.8rem; }
 
 .btn-primary.animated-gradient { 
@@ -185,7 +190,7 @@ textarea.glass-input { min-height: 46px; resize: vertical; }
 .btn-delete-row { background: rgba(248, 81, 73, 0.1); color: var(--danger); border: 1px solid transparent; padding: 6px; border-radius: 50%; cursor: pointer; font-size: 0.8rem; transition: 0.2s; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px;}
 .btn-delete-row:hover { background: var(--danger); color: white; transform: rotate(90deg);}
 
-/* [REF-CSS-NEW-CARD-COMPACT] */
+/* [REF-CSS-NEW-CARD-COMPACT SMARTPHONE] */
 .restaurant-card { 
     background: var(--card-bg); padding: 1rem; border-radius: 16px; margin-bottom: 1rem; 
     border: 1px solid var(--border-color); position: relative; overflow: hidden;
@@ -206,19 +211,19 @@ textarea.glass-input { min-height: 46px; resize: vertical; }
 
 .card-notes { font-size: 0.8rem; color: var(--text-muted); background: rgba(255,255,255,0.03); padding: 8px 10px; border-radius: 8px; margin-bottom: 10px; font-style: italic; border-left: 2px solid var(--border-color); }
 
-/* [REF-CSS-NEW-TOP-ACTIONS] */
-.card-top-actions { display: flex; gap: 6px; }
-.btn-top-action { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: none; cursor: pointer; transition: 0.2s; font-size: 0.9rem; }
-.btn-top-action.share { background: rgba(255,255,255,0.05); color: var(--text-main); border: 1px solid rgba(255,255,255,0.1); }
-.btn-top-action.share svg { width: 14px; height: 14px; stroke: currentColor; fill: none; }
-.btn-top-action.share:hover { background: rgba(168, 85, 247, 0.2); border-color: #a855f7; color: #d8b4fe; }
-.btn-top-action.edit { background: rgba(255,255,255,0.05); color: var(--text-main); border: 1px solid rgba(255,255,255,0.1); }
-.btn-top-action.edit svg { width: 14px; height: 14px; stroke: currentColor; fill: none; }
-.btn-top-action.edit:hover { background: rgba(59, 130, 246, 0.2); border-color: #3b82f6; color: #60a5fa; }
-.btn-top-action.fav { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); }
-.btn-top-action.fav.active { background: rgba(248, 81, 73, 0.15); border-color: var(--danger); }
-.btn-top-action.delete { background: rgba(248, 81, 73, 0.1); color: var(--danger); border: 1px solid transparent; }
-.btn-top-action.delete:hover { background: var(--danger); color: white; transform: rotate(90deg); }
+/* [REF-CSS-CARD-FOOTER-ACTIONS MOBILE FRIENDLY] */
+.card-footer-actions { 
+    display: flex; gap: 8px; margin-top: 12px; padding-top: 12px; 
+    border-top: 1px solid rgba(255,255,255,0.05); 
+}
+.btn-footer-action { 
+    flex: 1; padding: 10px 0; border-radius: 12px; background: rgba(255,255,255,0.05); 
+    color: var(--text-main); border: 1px solid rgba(255,255,255,0.05); 
+    font-size: 0.85rem; font-weight: 500; cursor: pointer; transition: 0.2s; 
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.btn-footer-action:hover { background: rgba(255,255,255,0.1); }
+.btn-footer-action.fav.active { background: rgba(248, 81, 73, 0.15); border-color: var(--danger); color: #ff7b72; }
 
 /* [REF-CSS-SOCIAL-LINKS] */
 .card-social-links { display: flex; gap: 8px; margin-bottom: 10px; }

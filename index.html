@@ -96,7 +96,7 @@
                 </div>
                 <input type="text" id="tipologia-custom" class="hidden glass-input mb-compact" placeholder="Specifica Tipologia...">
 
-                <div class="input-group">
+                <div class="input-group mb-compact">
                     <label>Nome locale e Preferenza *</label>
                     <div class="name-diet-wrapper">
                         <input type="text" id="nome" required placeholder="Es. Osteria del Mare" class="glass-input">
@@ -107,6 +107,20 @@
                             <button type="button" class="diet-btn" data-val="Normale" title="Normale">🍽️</button>
                         </div>
                     </div>
+                </div>
+
+                <div class="input-group mb-compact">
+                    <input type="tel" id="telefono" placeholder="Telefono (opzionale)" class="glass-input mb-compact">
+                    <div class="form-row mb-compact">
+                        <input type="url" id="link" placeholder="Sito Web (opzionale)" class="glass-input">
+                        <input type="text" id="instagram" placeholder="Instagram (es. @nome o URL)" class="glass-input">
+                    </div>
+                    <div class="form-row">
+                        <input type="url" id="maps" placeholder="Link Maps (opzionale)" class="glass-input">
+                        <button type="button" class="btn-secondary" onclick="captureGPS(this, 'maps', 'lat', 'lng')" style="width: auto; padding: 0 15px;" title="Ottieni coordinate GPS">📍 GPS</button>
+                    </div>
+                    <input type="hidden" id="lat">
+                    <input type="hidden" id="lng">
                 </div>
 
                 <details class="piatto-box form-accordion">
@@ -330,13 +344,13 @@
                 </div>
 
                 <div class="input-group mb-compact">
-                    <input type="tel" id="edit-telefono" placeholder="Telefono" class="glass-input mb-compact">
+                    <input type="tel" id="edit-telefono" placeholder="Telefono (opzionale)" class="glass-input mb-compact">
                     <div class="form-row mb-compact">
-                        <input type="url" id="edit-link" placeholder="Sito Web (cancella per rimuovere icona)" class="glass-input">
-                        <input type="text" id="edit-instagram" placeholder="Instagram (es. @nomelocale o URL)" class="glass-input">
+                        <input type="url" id="edit-link" placeholder="Sito Web (opzionale)" class="glass-input">
+                        <input type="text" id="edit-instagram" placeholder="Instagram (es. @nome o URL)" class="glass-input">
                     </div>
                     <div class="form-row">
-                        <input type="url" id="edit-maps" placeholder="Link Google Maps (cancella per rimuovere icona)" class="glass-input">
+                        <input type="url" id="edit-maps" placeholder="Link Maps (opzionale)" class="glass-input">
                         <button type="button" class="btn-secondary" onclick="captureGPS(this, 'edit-maps', 'edit-lat', 'edit-lng')" style="width: auto; padding: 0 15px;" title="Ottieni coordinate GPS">📍 GPS</button>
                     </div>
                     <input type="hidden" id="edit-lat">
