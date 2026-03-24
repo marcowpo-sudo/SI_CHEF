@@ -26,10 +26,7 @@
     <header class="app-header glass-effect">
         <h1>✨ SI CHEF!<br>the TasteList</h1>
         <div class="header-actions">
-            <button id="btn-sync" class="btn-icon" title="Forza Sincronizzazione">🔄 Sync</button>
-            <button id="btn-export" class="btn-icon" title="Scarica Backup">🥡 Asporto</button>
-            <label for="import-file" class="btn-icon" title="Carica Backup">🛎️ Ordina</label>
-            <input type="file" id="import-file" accept=".json" class="hidden">
+            <button id="btn-sync" class="btn-icon" title="Forza Sincronizzazione" style="padding: 0.5rem 1rem;">🔄 Sync Cloud</button>
         </div>
     </header>
 
@@ -451,7 +448,8 @@
                     </div>
                 </details>
 
-                <div style="display: flex; gap: 12px; margin-top: 20px;">
+                <div style="display: flex; gap: 8px; margin-top: 20px;">
+                    <button type="button" onclick="deleteFromEdit()" style="background: rgba(248, 81, 73, 0.15); border: 1px solid rgba(248, 81, 73, 0.3); color: #f85149; border-radius: 12px; width: 50px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; cursor: pointer; transition: 0.3s;" title="Elimina Locale">🗑️</button>
                     <button type="button" class="btn-secondary" onclick="closeEditModal()" style="flex: 1;">Annulla</button>
                     <button type="submit" class="btn-primary animated-gradient" style="flex: 2;">Salva Modifiche</button>
                 </div>

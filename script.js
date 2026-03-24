@@ -55,7 +55,7 @@ if (oldLocalData && oldLocalData.length > 0) {
     localStorage.removeItem('wishlistRistoranti_Premium');
 }
 
-// [REF-JS-MODALS] (Messe in window perché usiamo i Moduli)
+// [REF-JS-MODALS]
 window.openAddModal = function() {
     const m = document.getElementById('add-modal');
     m.classList.remove('hidden');
@@ -79,7 +79,7 @@ window.closeListModal = function() {
     setTimeout(() => m.classList.add('hidden'), 300);
 };
 
-// [REF-JS-EXPORT, IMPORT & MANAUL SYNC CLOUD]
+// [REF-JS-SYNC-CLOUD]
 document.getElementById('btn-sync').addEventListener('click', async () => {
     const btn = document.getElementById('btn-sync');
     const originalHTML = btn.innerHTML;
@@ -92,40 +92,11 @@ document.getElementById('btn-sync').addEventListener('click', async () => {
         });
         restaurants.sort((a, b) => b.id - a.id);
         renderList();
-        showToast("☁️ Sincronizzazione cloud completata!");
+        showToast("☁️ Sincronizzazione completata!");
     } catch (e) {
-        showToast("❌ Errore di connessione al Cloud.");
+        showToast("❌ Errore di connessione.");
     }
     btn.innerHTML = originalHTML;
-});
-
-document.getElementById('btn-export').addEventListener('click', () => {
-    if (restaurants.length === 0) return alert("Nessun dato da salvare!");
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(restaurants));
-    const dlAnchorElem = document.createElement('a');
-    dlAnchorElem.setAttribute("href", dataStr);
-    dlAnchorElem.setAttribute("download", `TasteList_CloudBackup_${new Date().toISOString().split('T')[0]}.json`);
-    dlAnchorElem.click();
-});
-
-document.getElementById('import-file').addEventListener('change', async function(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = async function(event) {
-        try {
-            const importedData = JSON.parse(event.target.result);
-            if (Array.isArray(importedData)) {
-                showToast("⏳ Sincronizzazione col Cloud in corso...");
-                for(let r of importedData) {
-                    await setDoc(doc(db, "restaurants", r.id.toString()), r);
-                }
-                alert("Collezione importata con successo nel Cloud! 🎉");
-            } else alert("Formato non valido.");
-        } catch (err) { alert("Errore di lettura."); }
-    };
-    reader.readAsText(file);
-    e.target.value = '';
 });
 
 // [REF-JS-DIET]
@@ -477,7 +448,6 @@ function renderList() {
                     <button class="btn-top-action edit" onclick="event.stopPropagation(); openEditModal(${r.id})" title="Modifica">${iconEdit}</button>
                     <button class="btn-top-action share" onclick="event.stopPropagation(); openShareModal(${r.id})" title="Condividi">${iconShare}</button>
                     <button class="btn-top-action fav ${isPreferito ? 'active' : ''}" onclick="event.stopPropagation(); toggleFavorite(${r.id})" title="${isPreferito ? 'Rimuovi dai Preferiti' : 'Aggiungi ai Preferiti'}">${isPreferito ? '❤️' : '🤍'}</button>
-                    <button class="btn-top-action delete" onclick="event.stopPropagation(); deleteRest(${r.id})" title="Elimina">✖</button>
                 </div>
             </div>
             
@@ -676,11 +646,14 @@ form.addEventListener('submit', (e) => {
     document.getElementById('diet-picker').setAttribute('data-diet', '');
 });
 
-// [REF-JS-DELETE]
-window.deleteRest = function(id) { 
-    if(confirm("Rimuovere definitivamente questo locale?")) { 
-        deleteDoc(doc(db, "restaurants", id.toString()));
-    } 
+// NUOVA FUNZIONE ELIMINA DA DENTRO IL MODAL
+window.deleteFromEdit = function() {
+    if(editingId && confirm("Rimuovere definitivamente questo locale?")) {
+        deleteDoc(doc(db, "restaurants", editingId.toString())).then(() => {
+            closeEditModal();
+            showToast("🗑️ Locale eliminato!");
+        });
+    }
 };
 
 // [REF-JS-MODAL-OPEN]
@@ -758,7 +731,7 @@ window.closeEditModal = function() {
     setTimeout(() => { editModal.classList.add('hidden'); editingId = null; }, 300);
 };
 
-// [REF-JS-SUBMIT-MODIFICA]
+// [REF-JS-SUBMIT-MODIFICA] CHIUSURA IMMEDIATA OTTIMISTICA
 editForm.addEventListener('submit', (e) => {
     e.preventDefault();
     const idx = restaurants.findIndex(r => r.id === editingId);
@@ -819,8 +792,13 @@ editForm.addEventListener('submit', (e) => {
             piattoForteNome: null, piattoForteVoto: null, piattoForteNote: null
         };
         
+        // Chiudo immediatamente la finestra e invio al server in background
+        closeEditModal();
         updateDoc(doc(db, "restaurants", editingId.toString()), updatedRest).then(() => {
-            closeEditModal();
+            showToast("✅ Modifiche salvate!");
+        }).catch(err => {
+            console.error(err);
+            showToast("❌ Errore nel salvataggio");
         });
     }
 });
