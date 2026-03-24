@@ -124,6 +124,8 @@ textarea.glass-input { min-height: 46px; resize: vertical; }
 .form-accordion[open] summary .arrow-icon { transform: rotate(180deg); }
 .accordion-inner { padding-top: 1rem; }
 
+.contacts-box { border-left: 3px solid #3b82f6; background: rgba(59, 130, 246, 0.05); }
+.contacts-box h3 { color: #60a5fa; }
 .notes-box { border-left: 3px solid #6366f1; background: rgba(99, 102, 241, 0.05); }
 .tiramisu-box { border-left: 3px solid #eab308; background: rgba(234, 179, 8, 0.05); }
 .tiramisu-box h3 { color: #fbbf24; }
@@ -171,7 +173,6 @@ textarea.glass-input { min-height: 46px; resize: vertical; }
 .big-btn.primary { background-image: var(--gradient); background-size: 200% auto; box-shadow: 0 4px 15px rgba(255, 123, 114, 0.2); }
 .big-btn.primary:hover { background-position: right center; box-shadow: 0 6px 20px rgba(255, 123, 114, 0.4); transform: translateY(-2px); }
 
-/* Nuova Comanda riceve un gradiente diverso e bellissimo per stare in armonia */
 .big-btn.secondary { background-image: var(--gradient-alt); background-size: 200% auto; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.2); }
 .big-btn.secondary:hover { background-position: right center; box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4); transform: translateY(-2px); }
 

@@ -39,15 +39,15 @@ onSnapshot(restRef, (snapshot) => {
     snapshot.forEach((docSnap) => {
         restaurants.push(docSnap.data());
     });
-    
-    // Ordine cronologico
     restaurants.sort((a, b) => b.id - a.id);
     renderList();
 });
 
-// [REF-JS-MODALS] 
+// [REF-JS-MODALS-OPEN-CLOSE] (Chiude in automatico tutte le tendine per pulizia)
 window.openAddModal = function() {
     const m = document.getElementById('add-modal');
+    // Chiude tutte le tendine
+    m.querySelectorAll('details').forEach(d => d.removeAttribute('open'));
     m.classList.remove('hidden');
     setTimeout(() => m.classList.add('show'), 10);
 };
@@ -266,7 +266,7 @@ function getDistance(lat1, lon1, lat2, lng2) {
     return R * c;
 }
 
-// SVG Icons per i contatti e i tasti
+// SVG Icons per i contatti
 const iconWeb = `<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>`;
 const iconIg = `<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>`;
 const iconTel = `<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>`;
@@ -313,7 +313,7 @@ function startDashboardTicker() {
     }, 3500);
 }
 
-// [REF-JS-RENDER-LISTA] (Gestione intelligente dei Link e nuovo Layout Footer)
+// [REF-JS-RENDER-LISTA]
 function renderList() {
     const fStato = filterStato.value;
     const fTipo = filterTipologia.value;
@@ -369,11 +369,15 @@ function renderList() {
         }
         let iconHtml = domain ? `<img src="https://s2.googleusercontent.com/s2/favicons?domain=${domain}&sz=64" alt="Logo">` : `${dietIcon}`;
 
-        // LOGICA LINK INTELLIGENTE: Usa il tuo link, se è vuoto usa Google Search in automatico!
         let webHref = (r.link && r.link.trim() !== "") ? r.link : `https://www.google.com/search?q=${encodeURIComponent(r.nome + " " + r.tipologia)}`;
         let mapsHref = (r.maps && r.maps.trim() !== "") ? r.maps : `https://maps.google.com/?q=$${encodeURIComponent(r.nome + " " + r.tipologia)}`;
         let igHref = (r.instagram && r.instagram.trim() !== "") ? r.instagram : `https://www.google.com/search?q=${encodeURIComponent("site:instagram.com " + r.nome + " " + r.tipologia)}`;
-        let telLink = (r.telefono && r.telefono.trim() !== "") ? r.telefono : null;
+        
+        // FIX SICURO PER IL TELEFONO
+        let telLink = null;
+        if (r.telefono && String(r.telefono).trim() !== "") {
+            telLink = String(r.telefono).trim();
+        }
 
         let statoBadge = '';
         let isPreferito = r.stato === 'Preferito';
@@ -412,7 +416,6 @@ function renderList() {
         card.className = 'restaurant-card';
         card.style.animationDelay = `${index * 0.05}s`;
         
-        // NUOVO LAYOUT OTTIMIZZATO PER SMARTPHONE
         card.innerHTML = `
             <div class="card-header">
                 <div class="card-main-icon">${iconHtml}</div>
@@ -555,6 +558,23 @@ function showToast(message) {
     }, 3500);
 }
 
+// [REF-JS-PARSERS LINK MAGICI]
+function parseIgUrl(val) {
+    let ig = val.trim();
+    if (!ig) return "";
+    if (ig.includes('instagram.com')) {
+        return ig.startsWith('http') ? ig : 'https://' + ig;
+    }
+    if (ig.startsWith('@')) return `https://www.instagram.com/${ig.substring(1)}`;
+    return `https://www.instagram.com/${ig}`;
+}
+
+function parseWebUrl(val) {
+    let url = val.trim();
+    if (!url) return "";
+    return url.startsWith('http') ? url : 'https://' + url;
+}
+
 // [REF-JS-SUBMIT-NUOVA-COMANDA] 
 form.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -562,15 +582,6 @@ form.addEventListener('submit', (e) => {
     
     let tipologiaValue = document.getElementById('tipologia').value;
     if (tipologiaValue === 'Altro') tipologiaValue = document.getElementById('tipologia-custom').value;
-
-    // Logica salvataggio link puliti (senza sporcare il db)
-    let formIg = document.getElementById('instagram').value.trim();
-    let newIg = "";
-    if (formIg !== "") {
-        if (formIg.startsWith('http')) newIg = formIg;
-        else if (formIg.startsWith('@')) newIg = `https://www.instagram.com/${formIg.substring(1)}`;
-        else newIg = `https://www.instagram.com/${formIg}`;
-    }
 
     const piattiFortiArr = getPiattiFortiData('piatti-forti-container');
     const newId = Date.now();
@@ -584,9 +595,9 @@ form.addEventListener('submit', (e) => {
         tipologia: tipologiaValue,
         diet: document.getElementById('diet-picker').getAttribute('data-diet'),
         telefono: document.getElementById('telefono').value.trim(),
-        link: document.getElementById('link').value.trim(),
-        maps: document.getElementById('maps').value.trim(),
-        instagram: newIg,
+        link: parseWebUrl(document.getElementById('link').value),
+        maps: parseWebUrl(document.getElementById('maps').value),
+        instagram: parseIgUrl(document.getElementById('instagram').value),
         lat: eLat ? parseFloat(eLat) : null,
         lng: eLng ? parseFloat(eLng) : null,
         noteGenerali: document.getElementById('note-generali').value,
@@ -702,6 +713,9 @@ window.openEditModal = function(id) {
         addPiattoForteRow('edit-piatti-forti-container'); 
     }
 
+    // Chiude tutte le tendine prima di mostrare
+    editModal.querySelectorAll('details').forEach(d => d.removeAttribute('open'));
+
     editModal.classList.remove('hidden');
     setTimeout(() => editModal.classList.add('show'), 10);
 };
@@ -721,17 +735,8 @@ editForm.addEventListener('submit', (e) => {
         if (tipologiaValue === 'Altro') tipologiaValue = document.getElementById('edit-tipologia-custom').value;
 
         const piattiFortiArr = getPiattiFortiData('edit-piatti-forti-container');
-
         let eLat = document.getElementById('edit-lat').value || null;
         let eLng = document.getElementById('edit-lng').value || null;
-
-        let formIg = document.getElementById('edit-instagram').value.trim();
-        let newIg = "";
-        if (formIg !== "") {
-            if (formIg.startsWith('http')) newIg = formIg;
-            else if (formIg.startsWith('@')) newIg = `https://www.instagram.com/${formIg.substring(1)}`;
-            else newIg = `https://www.instagram.com/${formIg}`;
-        }
 
         const updatedRest = {
             ...restaurants[idx],
@@ -740,9 +745,9 @@ editForm.addEventListener('submit', (e) => {
             tipologia: tipologiaValue,
             diet: document.getElementById('edit-diet-picker').getAttribute('data-diet'),
             telefono: document.getElementById('edit-telefono').value.trim(),
-            link: document.getElementById('edit-link').value.trim(),
-            maps: document.getElementById('edit-maps').value.trim(),
-            instagram: newIg, 
+            link: parseWebUrl(document.getElementById('edit-link').value),
+            maps: parseWebUrl(document.getElementById('edit-maps').value),
+            instagram: parseIgUrl(document.getElementById('edit-instagram').value), 
             lat: eLat ? parseFloat(eLat) : restaurants[idx].lat, 
             lng: eLng ? parseFloat(eLng) : restaurants[idx].lng,
             noteGenerali: document.getElementById('edit-note-generali').value,

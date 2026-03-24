@@ -109,19 +109,32 @@
                     </div>
                 </div>
 
-                <div class="input-group mb-compact">
-                    <input type="tel" id="telefono" placeholder="Telefono (opzionale)" class="glass-input mb-compact">
-                    <div class="form-row mb-compact">
-                        <input type="url" id="link" placeholder="Sito Web (opzionale)" class="glass-input">
-                        <input type="text" id="instagram" placeholder="Instagram (es. @nome o URL)" class="glass-input">
+                <details class="contacts-box form-accordion">
+                    <summary>
+                        <h3>📞 Contatti e Link (Opzionali)</h3>
+                        <span class="arrow-icon">▼</span>
+                    </summary>
+                    <div class="accordion-inner">
+                        <div class="input-group mb-compact">
+                            <label>Numero di Telefono</label>
+                            <input type="tel" id="telefono" placeholder="Es. 02 1234567" class="glass-input mb-compact">
+                            
+                            <label>Sito Web (Se vuoto: cerca su Google)</label>
+                            <input type="text" id="link" placeholder="Es. www.ristorante.it" class="glass-input mb-compact">
+                            
+                            <label>Profilo Instagram (Se vuoto: cerca su Google)</label>
+                            <input type="text" id="instagram" placeholder="Es. @nomelocale o link intero" class="glass-input mb-compact">
+                            
+                            <label>Link Google Maps</label>
+                            <div class="form-row">
+                                <input type="text" id="maps" placeholder="Es. goo.gl/maps/..." class="glass-input">
+                                <button type="button" class="btn-secondary" onclick="captureGPS(this, 'maps', 'lat', 'lng')" style="width: auto; padding: 0 15px;" title="Ottieni coordinate GPS">📍 GPS</button>
+                            </div>
+                            <input type="hidden" id="lat">
+                            <input type="hidden" id="lng">
+                        </div>
                     </div>
-                    <div class="form-row">
-                        <input type="url" id="maps" placeholder="Link Maps (opzionale)" class="glass-input">
-                        <button type="button" class="btn-secondary" onclick="captureGPS(this, 'maps', 'lat', 'lng')" style="width: auto; padding: 0 15px;" title="Ottieni coordinate GPS">📍 GPS</button>
-                    </div>
-                    <input type="hidden" id="lat">
-                    <input type="hidden" id="lng">
-                </div>
+                </details>
 
                 <details class="piatto-box form-accordion">
                     <summary>
@@ -343,19 +356,32 @@
                     </div>
                 </div>
 
-                <div class="input-group mb-compact">
-                    <input type="tel" id="edit-telefono" placeholder="Telefono (opzionale)" class="glass-input mb-compact">
-                    <div class="form-row mb-compact">
-                        <input type="url" id="edit-link" placeholder="Sito Web (opzionale)" class="glass-input">
-                        <input type="text" id="edit-instagram" placeholder="Instagram (es. @nome o URL)" class="glass-input">
+                <details class="contacts-box form-accordion">
+                    <summary>
+                        <h3>📞 Contatti e Link (Opzionali)</h3>
+                        <span class="arrow-icon">▼</span>
+                    </summary>
+                    <div class="accordion-inner">
+                        <div class="input-group mb-compact">
+                            <label>Numero di Telefono</label>
+                            <input type="tel" id="edit-telefono" placeholder="Es. 02 1234567" class="glass-input mb-compact">
+                            
+                            <label>Sito Web (Cancella per nascondere l'icona)</label>
+                            <input type="text" id="edit-link" placeholder="Es. www.ristorante.it" class="glass-input mb-compact">
+                            
+                            <label>Profilo Instagram</label>
+                            <input type="text" id="edit-instagram" placeholder="Es. @nomelocale o link intero" class="glass-input mb-compact">
+                            
+                            <label>Link Google Maps</label>
+                            <div class="form-row">
+                                <input type="text" id="edit-maps" placeholder="Es. goo.gl/maps/..." class="glass-input">
+                                <button type="button" class="btn-secondary" onclick="captureGPS(this, 'edit-maps', 'edit-lat', 'edit-lng')" style="width: auto; padding: 0 15px;" title="Ottieni coordinate GPS">📍 GPS</button>
+                            </div>
+                            <input type="hidden" id="edit-lat">
+                            <input type="hidden" id="edit-lng">
+                        </div>
                     </div>
-                    <div class="form-row">
-                        <input type="url" id="edit-maps" placeholder="Link Maps (opzionale)" class="glass-input">
-                        <button type="button" class="btn-secondary" onclick="captureGPS(this, 'edit-maps', 'edit-lat', 'edit-lng')" style="width: auto; padding: 0 15px;" title="Ottieni coordinate GPS">📍 GPS</button>
-                    </div>
-                    <input type="hidden" id="edit-lat">
-                    <input type="hidden" id="edit-lng">
-                </div>
+                </details>
 
                 <details class="piatto-box form-accordion">
                     <summary>
@@ -449,7 +475,7 @@
                     </div>
                 </details>
 
-                <details class="notes-box form-accordion" open>
+                <details class="notes-box form-accordion">
                     <summary>
                         <h3>🍴 Ristorante</h3>
                         <span class="arrow-icon">▼</span>
